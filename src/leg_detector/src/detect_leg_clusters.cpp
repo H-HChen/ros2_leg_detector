@@ -177,7 +177,8 @@ private:
         processor.removeLessThan(min_points_per_cluster_);
         
         // OpenCV matrix needed to use the OpenCV random forest classifier
-        CvMat* tmp_mat = cvCreateMat(1, feat_count_, CV_32FC1);
+        cv::Mat tmp_mat(1, feat_count_, CV_32FC1);
+        //tmp_mat.create(1, feat_count_, CV_32FC1);
 
         leg_detector_msgs::msg::LegArray detected_leg_clusters;
         detected_leg_clusters.header.frame_id = scan->header.frame_id;
@@ -234,7 +235,7 @@ private:
                     // Classify cluster using random forest classifier
                     std::vector<float> f = cf_.calcClusterFeatures(*cluster, *scan);
                     for (int k = 0; k < feat_count_; k++)
-                        tmp_mat->data.fl[k] = (float)(f[k]);
+                        tmp_mat.at<float>(k) = (float)(f[k]);
                     
                     #if (CV_VERSION_MAJOR <= 3 || CV_VERSION_MINOR <= 2)
                         // Output of forest->predict is [-1.0, 1.0] so we scale to reach [0.0, 1.0]
@@ -243,7 +244,7 @@ private:
                         // The forest->predict funciton has been removed in the latest versions of OpenCV so we'll do the calculation explicitly.
                         RCLCPP_INFO (this->get_logger(), "Checkout 6");
                         cv::Mat result;
-                        forest->getVotes(cv::cvarrToMat(tmp_mat), result, 0);
+                        forest->getVotes(tmp_mat, result, 0);
                         int positive_votes = result.at<int>(1, 1);
                         int negative_votes = result.at<int>(1, 0);
                         float probability_of_leg = positive_votes / static_cast<double>(positive_votes + negative_votes);
@@ -329,7 +330,7 @@ private:
         }
         num_prev_markers_published_ = id_num; // For the next callback
         detected_leg_clusters_pub_->publish(detected_leg_clusters);
-        cvReleaseMat(&tmp_mat);
+        tmp_mat.release();
     }
 
     /**
