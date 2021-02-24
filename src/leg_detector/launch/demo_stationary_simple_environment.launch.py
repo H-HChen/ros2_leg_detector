@@ -16,10 +16,10 @@ def generate_launch_description():
     ld = LaunchDescription([
 
         # Launching Rosbag node
-        launch.actions.ExecuteProcess(
-            cmd=['ros2', 'bag', 'play', '-s', 'rosbag_v2', rosbag_path],
-            output='screen'
-        ),
+    #    launch.actions.ExecuteProcess(
+    #        cmd=['ros2', 'bag', 'play', '-s', 'rosbag_v2', rosbag_path],
+    #        output='screen'
+    #    ),
 
         # Launching RVIZ2
         launch.actions.ExecuteProcess(
@@ -36,7 +36,7 @@ def generate_launch_description():
             parameters= [
                 {"forest_file" : forest_file_path},
                 {"scan_topic" : "/scan"},
-                {"fixed_frame" : "laser"},
+                {"fixed_frame" : "laser_frame"},
             ]
     )
 
@@ -47,7 +47,7 @@ def generate_launch_description():
         name="joint_leg_tracker",
         parameters=[
             {"scan_topic" : "/scan"},
-            {"fixed_frame" : "laser"},
+            {"fixed_frame" : "laser_frame"},
             {"scan_frequency" : 10}
         ]    
     )
@@ -69,7 +69,7 @@ def generate_launch_description():
         name="local_occupancy_grid_mapping",
         parameters=[
             {"scan_topic" : "/scan"},
-            {"fixed_frame" : "laser"},
+            {"fixed_frame" : "laser_frame"},
         ]    
     )
 
