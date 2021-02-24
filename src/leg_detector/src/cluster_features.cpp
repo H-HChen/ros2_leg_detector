@@ -34,8 +34,9 @@
 
 #include "leg_detector/cluster_features.h"
 
-#include <opencv/cxcore.h>
-#include <opencv/cv.h>
+#include <opencv2/core.hpp>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/base.hpp>
 
 
 std::vector<float> ClusterFeatures::calcClusterFeatures(const laser_processor::SampleSet* cluster, const sensor_msgs::msg::LaserScan& scan)
@@ -176,7 +177,7 @@ std::vector<float> ClusterFeatures::calcClusterFeatures(const laser_processor::S
     }
     cv::Mat sol(3, 1, CV_64FC1);
 
-    cvSolve(&A, &B, &sol, CV_SVD);
+    cv::solve(A, B, sol, cv::DECOMP_SVD);
 
     float xc = sol.at<float>(0, 0);
     float yc = sol.at<float>(1, 0);
