@@ -239,7 +239,7 @@ private:
                     
                     #if (CV_VERSION_MAJOR <= 3 || CV_VERSION_MINOR <= 2)
                         // Output of forest->predict is [-1.0, 1.0] so we scale to reach [0.0, 1.0]
-                        float probability_of_leg = 0.5 * (1.0 + forest->predict(cv::cvarrToMat(tmp_mat)));
+                        float probability_of_leg = 0.5 * (1.0 + forest->predict(tmp_mat));
                     #else
                         // The forest->predict funciton has been removed in the latest versions of OpenCV so we'll do the calculation explicitly.
                         RCLCPP_INFO (this->get_logger(), "Checkout 6");
