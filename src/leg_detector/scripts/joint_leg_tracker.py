@@ -193,9 +193,6 @@ class KalmanMultiTrackerNode(Node):
         self.max_leg_pairing_dist = self.get_parameter_or("max_leg_pairing_dist", 0.8)
         self.confidence_threshold_to_maintain_track = self.get_parameter_or("confidence_threshold_to_maintain_track", 0.1)
         self.publish_occluded = self.get_parameter_or("publish_occluded", True)
-        self.publish_people_frame = self.get_parameter_or("publish_people_frame", self.fixed_frame)
-        self.use_scan_header_stamp_for_tfs = self.get_parameter_or("use_scan_header_stamp_for_tfs", False)
-        self.publish_detected_people = self.get_parameter_or("display_detected_people", False)
         self.dist_travelled_together_to_initiate_leg_pair = self.get_parameter_or("dist_travelled_together_to_initiate_leg_pair", 0.5)
         self.scan_frequency = self.get_parameter_or("scan_frequency", 7.5)
         self.in_free_space_threshold = self.get_parameter_or("in_free_space_threshold", 0.06)
@@ -311,15 +308,14 @@ class KalmanMultiTrackerNode(Node):
 
         # Waiting for the local map to be published before proceeding. This is ONLY needed so the benchmarks are consistent every iteration
         # Should be removed under regular operation
-        if self.use_scan_header_stamp_for_tfs:       # Assume <self.use_scan_header_stamp_for_tfs> means we're running the timing benchmark
-            wait_iters = 0
-            while self.new_local_map_received == False and wait_iters < 10:
-                #insert sleep command
-                wait_iters += 1
-            if wait_iters >= 10:
-                self.get_logger().info("no new local_map received. Continuing anyways")
-            else:
-                self.new_local_map_received = False
+        wait_iters = 0
+        while self.new_local_map_received == False and wait_iters < 10:
+            #insert sleep command
+            wait_iters += 1
+        if wait_iters >= 10:
+            self.get_logger().info("no new local_map received. Continuing anyways")
+        else:
+            self.new_local_map_received = False
                 
         now = detected_clusters_msg.header.stamp
         
@@ -524,63 +520,45 @@ class KalmanMultiTrackerNode(Node):
     def publish_tracked_people(self, now):
         people_tracked_msg = PersonArray()
         people_tracked_msg.header.stamp = now
-        people_tracked_msg.header.frame_id = self.publish_people_frame
+        people_tracked_msg.header.frame_id = self.fixed_frame
 
         # Make sure we can get the required transform first:
-        if self.use_scan_header_stamp_for_tfs:
-            tf_time = now
-            try:
-                transform = self.buffer.lookup_transform(self.fixed_frame, self.publish_people_frame, tf_time, rclpy.time.Duration(1.0))
-                transform_available = True
-            except(tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
-                transform_available = False
-        else:
-            tf_time = self.get_clock().now()
-            transform_available = self.buffer.can_transform(self.fixed_frame, self.publish_people_frame, tf_time)
+        
+        for person in self.objects_tracked:
+            if person.is_person == True:
+                if self.publish_occluded or person.seen_in_current_scan: # Only publish people who have been seen in current scan, unless we want to publish occluded people
+                    tf_time = self.get_clock().now().to_msg()
+                    ps = PointStamped()
+                    ps.header.frame_id = self.fixed_frame
+                    ps.header.stamp = tf_time
+                    ps.point.x = person.pos_x
+                    ps.point.y = person.pos_y
 
-        if not transform_available:
-            self.get_logger().info("Person tracker: tf not avaiable. Not publishing people")
-        else :
-            for person in self.objects_tracked:
-                if person.is_person == True:
-                    if self.publish_occluded or person.seen_in_current_scan: # Only publish people who have been seen in current scan, unless we want to publish occluded people
-                        # Get position in the <self.publish_people_frame> frame 
-                        ps = PointStamped()
-                        ps.header.frame_id = self.fixed_frame
-                        ps.header.stamp = tf_time.to_msg()
-                        ps.point.x = person.pos_x
-                        ps.point.y = person.pos_y
-                        try:
-                            ps = self.buffer.transform(ps, self.publish_people_frame)
-                        except:
-                            self.get_logger().error("Not publishing people due to no transform from fixed_frame-->publish_people_frame")
-                            continue
+                    # pulish to people_tracked topic
+                    new_person = Person()
+                    new_person.pose.position.x = ps.point.x
+                    new_person.pose.position.y = ps.point.y 
+                    yaw = math.atan2(person.vel_y, person.vel_x)
+                    quaternion = self.ToQuaternion(yaw, 0, 0)
+                    new_person.pose.orientation.x = quaternion.x
+                    new_person.pose.orientation.y = quaternion.y
+                    new_person.pose.orientation.z = quaternion.z
+                    new_person.pose.orientation.w = quaternion.w
+                    new_person.id = person.id_num
+                    people_tracked_msg.people.append(new_person)
 
-                        # pulish to people_tracked topic
-                        new_person = Person()
-                        new_person.pose.position.x = ps.point.x
-                        new_person.pose.position.y = ps.point.y 
-                        yaw = math.atan2(person.vel_y, person.vel_x)
-                        quaternion = self.ToQuaternion(yaw, 0, 0)
-                        new_person.pose.orientation.x = quaternion.x
-                        new_person.pose.orientation.y = quaternion.y
-                        new_person.pose.orientation.z = quaternion.z
-                        new_person.pose.orientation.w = quaternion.w
-                        new_person.id = person.id_num
-                        people_tracked_msg.people.append(new_person)
-
-                        tf_msg = geometry_msgs.msg.TransformStamped()
-                        tf_msg.header.stamp = tf_time.to_msg()
-                        tf_msg.header.frame_id = self.publish_people_frame
-                        tf_msg.child_frame_id = 'People_' + str()
-                        tf_msg.transform.translation.x = ps.point.x
-                        tf_msg.transform.translation.y = ps.point.y
-                        tf_msg.transform.translation.z = 0.0
-                        tf_msg.transform.rotation.x = quaternion.x
-                        tf_msg.transform.rotation.y = quaternion.y
-                        tf_msg.transform.rotation.z = quaternion.z
-                        tf_msg.transform.rotation.w = quaternion.w
-                        self.tf_broadcast.sendTransform(tf_msg)
+                    tf_msg = TransformStamped()
+                    tf_msg.header.stamp = tf_time
+                    tf_msg.header.frame_id = self.fixed_frame
+                    tf_msg.child_frame_id = 'People_' + str(person.id_num)
+                    tf_msg.transform.translation.x = ps.point.x
+                    tf_msg.transform.translation.y = ps.point.y
+                    tf_msg.transform.translation.z = 0.0
+                    tf_msg.transform.rotation.x = quaternion.x
+                    tf_msg.transform.rotation.y = quaternion.y
+                    tf_msg.transform.rotation.z = quaternion.z
+                    tf_msg.transform.rotation.w = quaternion.w
+                    self.tf_broadcast.sendTransform(tf_msg)
 
         # Publish people tracked message
         self.people_tracked_pub.publish(people_tracked_msg)                    
