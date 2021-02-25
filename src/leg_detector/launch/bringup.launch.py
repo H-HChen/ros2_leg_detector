@@ -10,7 +10,7 @@ import os
 
 frame_name = LaunchConfiguration("frame_name", default = "laser_frame")
 leg_detector_path = get_package_share_directory('leg_detector')
-rviz2_config_path = leg_detector_path + "/rosbag/demos/rviz/demo_stationary_simple_environment.rviz"
+rviz2_config_path = leg_detector_path + "/rviz/default.rviz"
 forest_file_path = leg_detector_path + "/config/trained_leg_detector_res=0.33.yaml"
     
 def generate_launch_description():

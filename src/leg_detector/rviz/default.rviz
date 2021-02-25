@@ -136,6 +136,8 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        People_28:
+          Value: true
         base_footprint:
           Value: false
         base_link:
@@ -146,10 +148,6 @@ Visualization Manager:
           Value: true
         odom:
           Value: true
-        wheel_left_link:
-          Value: false
-        wheel_right_link:
-          Value: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -162,11 +160,8 @@ Visualization Manager:
               imu_link:
                 {}
               laser_frame:
-                {}
-              wheel_left_link:
-                {}
-              wheel_right_link:
-                {}
+                People_28:
+                  {}
       Update Interval: 0
       Value: true
   Enabled: true
@@ -212,25 +207,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 10
+      Distance: 6.57951021194458
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: -0.46706217527389526
+        Y: 0.2698427140712738
+        Z: 0.19605420529842377
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.7847970724105835
+      Pitch: 0.9347971677780151
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.748186111450195
+      Yaw: 4.703186988830566
     Saved: ~
 Window Geometry:
   Displays:
