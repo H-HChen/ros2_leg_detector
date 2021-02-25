@@ -242,7 +242,6 @@ private:
                         float probability_of_leg = 0.5 * (1.0 + forest->predict(tmp_mat));
                     #else
                         // The forest->predict funciton has been removed in the latest versions of OpenCV so we'll do the calculation explicitly.
-                        RCLCPP_INFO (this->get_logger(), "Checkout 6");
                         cv::Mat result;
                         forest->getVotes(tmp_mat, result, 0);
                         int positive_votes = result.at<int>(1, 1);
