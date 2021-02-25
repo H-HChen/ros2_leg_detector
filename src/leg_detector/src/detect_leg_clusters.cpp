@@ -178,7 +178,6 @@ private:
         
         // OpenCV matrix needed to use the OpenCV random forest classifier
         cv::Mat tmp_mat(1, feat_count_, CV_32FC1);
-        //tmp_mat.create(1, feat_count_, CV_32FC1);
 
         leg_detector_msgs::msg::LegArray detected_leg_clusters;
         detected_leg_clusters.header.frame_id = scan->header.frame_id;

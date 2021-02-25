@@ -15,12 +15,6 @@ def generate_launch_description():
 
     ld = LaunchDescription([
 
-        # Launching Rosbag node
-    #    launch.actions.ExecuteProcess(
-    #        cmd=['ros2', 'bag', 'play', '-s', 'rosbag_v2', rosbag_path],
-    #        output='screen'
-    #    ),
-
         # Launching RVIZ2
         launch.actions.ExecuteProcess(
             cmd=['ros2', 'run', 'rviz2', 'rviz2', '-d', rviz2_config_path],
@@ -48,19 +42,20 @@ def generate_launch_description():
         parameters=[
             {"scan_topic" : "/scan"},
             {"fixed_frame" : "laser_frame"},
-            {"scan_frequency" : 10}
+            {"scan_frequency" : 10},
+            {"publish_people_frame" : "base_link"}
         ]    
     )
 
     # Launching inflated_human_scan node
-    inflated_human_scan_node = Node(
-        package="leg_detector",
-        executable="inflated_human_scan",
-        name="inflated_human_scan",
-        parameters=[
-            {"inflation_radius" : 1.0}
-        ]
-    )
+    #inflated_human_scan_node = Node(
+    #    package="leg_detector",
+    #    executable="inflated_human_scan",
+     #   name="inflated_human_scan",
+    #    parameters=[
+    #        {"inflation_radius" : 1.0}
+    #    ]
+    #)
         
     # Launching local_occupancy_grid_mapping node
     local_occupancy_grid_mapping_node = Node(
@@ -75,7 +70,7 @@ def generate_launch_description():
 
     ld.add_action(detect_leg_clusters_node)
     ld.add_action(joint_leg_tracker_node)
-    ld.add_action(inflated_human_scan_node)
+    #ld.add_action(inflated_human_scan_node)
     ld.add_action(local_occupancy_grid_mapping_node)
 
     return ld 

@@ -72,7 +72,7 @@ class OccupancyGridMapping :public rclcpp::Node
             this->declare_parameter("min_points_per_cluster");
             
             this->get_parameter_or("scan_topic", scan_topic, std::string("/scan"));
-            this->get_parameter_or("fixed_frame", fixed_frame_, std::string("laser"));
+            this->get_parameter_or("fixed_frame", fixed_frame_, std::string("laser_frame"));
             this->get_parameter_or("base_frame", base_frame_, std::string("base_link"));
             this->get_parameter_or("local_map_topic", local_map_topic, std::string("local_map"));
             this->get_parameter_or("local_map_resolution", resolution_, 0.05);
@@ -117,7 +117,6 @@ class OccupancyGridMapping :public rclcpp::Node
             sync.registerCallback(std::bind(&OccupancyGridMapping::laserAndLegCallback, this, std::placeholders::_1, std::placeholders::_2));
 
             map_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>(local_map_topic, 10);
-            markers_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("visualization_marker", 20);
 
         }
 
@@ -132,7 +131,6 @@ class OccupancyGridMapping :public rclcpp::Node
         message_filters::Subscriber<leg_detector_msgs::msg::LegArray> non_leg_clusters_sub_;
         message_filters::TimeSynchronizer<sensor_msgs::msg::LaserScan, leg_detector_msgs::msg::LegArray> sync;
         rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr map_pub_;
-        rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr markers_pub_;
 
         //-----
 
