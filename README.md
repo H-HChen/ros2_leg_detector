@@ -2,21 +2,27 @@
 
 This repository is developed for Mowito Obstacle Detection and Human Detection module in ROS2 Foxy Foxtrot.
 
-To run Leg detector in ROS2 ensure you have OpenCV 3.4.12 installed
+To run Leg detector in ROS2 ensure you have OpenCV installed
 
 Here are the steps to Run leg_detector in ros2
 
-1.  clone the repository 
-2. build the code with the following command
+1. Clone the repository
 
-    `$> colcon build`
-3. source the newly buit package
+2. Install python dependency
+
+    `$> pip3 install -r requirement.txt`
+
+3. Build the code with the following command
+
+    `$> colcon build --symlink-install`
+
+4. Source the newly buit package
 
     `$> source <path to ros2_leg_detector>/install/setup.bash`
 
-4. run the code with the launch file using the following command
+5. Run the code with the launch file using the following command
 
-    `$> ros2 launch leg_detector demo_stationary_simple_environment.launch.py`
+    `$> ros2 launch leg_detector bringup.launch.py`
 
 ## Subsribed topics
 
@@ -52,7 +58,6 @@ All subscribed topics can be changed in the launch file
 
 * fixed_frame
 
-* publish_people_frame
 
 ## Other parameters
 
@@ -100,10 +105,6 @@ All subscribed topics can be changed in the launch file
 
   If people who weren't seen in the previous scan should be published to the /people_tracked topic. Default: True.
 
-
-* use_scan_header_stamp_for_tfs
-
-  If you should use the scan headers to do tfs or just use the latest transform available. If you're trying to do repeatable tests on recorded bags than it might be useful to use the scan headers. Default: False (i.e., use latest tf available).
 
 
 * display_detected_people
